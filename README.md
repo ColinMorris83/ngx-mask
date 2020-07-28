@@ -29,17 +29,49 @@ $ npm install --save ngx-mask
 
 Import **ngx-mask** module in Angular app.
 
+### With default mask config options
+
 ```typescript
 import { NgxMaskModule, IConfig } from 'ngx-mask'
 
 export const options: Partial<IConfig> | (() => Partial<IConfig>);
 
 @NgModule({
-  (...)
   imports: [
-    NgxMaskModule.forRoot(options)
-  ]
-  (...)
+    NgxMaskModule.forRoot(),
+  ],
+})
+```
+
+### Passing in your own mask config options
+
+```typescript
+import { NgxMaskModule, IConfig } from 'ngx-mask'
+
+const maskConfig: Partial<IConfig> = {
+  validation: false,
+};
+
+@NgModule({
+  imports: [
+    NgxMaskModule.forRoot(maskConfig),
+  ],
+})
+```
+
+Or using a function to get the config:
+
+```typescript
+const maskConfigFunction: () => Partial<IConfig> = () => {
+  return {
+    validation: false,
+  };
+};
+
+@NgModule({
+  imports: [
+    NgxMaskModule.forRoot(maskConfigFunction),
+  ],
 })
 ```
 
@@ -391,4 +423,26 @@ You can hide symbols in input field and get the actual value in `formcontrol`.
 
 ```html
 <input mask="IP" />
+```
+
+### CPF_CNPJ valid mask
+
+#### Usage
+
+```html
+<input mask="CPF_CNPJ" />
+```
+
+### Dynamic valid mask
+
+#### Usage
+
+You can pass into mask pattern with `||`.
+
+```html
+<input mask="000.000.000-00||00.000.000/0000-00" />
+```
+
+```html
+<input mask="(00) 0000-0000||(00) 0 0000-0000" />
 ```

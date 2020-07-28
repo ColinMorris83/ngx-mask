@@ -19,6 +19,7 @@ export class MaskApplierService {
   public decimalMarker!: IConfig['decimalMarker'];
   public customPattern!: IConfig['patterns'];
   public ipError?: boolean;
+  public cpfCnpjError?: boolean;
   public showMaskTyped!: IConfig['showMaskTyped'];
   public placeHolderCharacter!: IConfig['placeHolderCharacter'];
   public validation: IConfig['validation'];
@@ -71,6 +72,20 @@ export class MaskApplierService {
       this.ipError = !!(inputArray.filter((i: string) => i === '.').length < 3 && inputArray.length < 7);
       maskExpression = '099.099.099.099';
     }
+    const arr: string[] = [];
+    for (let i = 0; i < inputValue.length; i++) {
+      if (inputValue[i].match('\\d')) {
+        arr.push(inputValue[i]);
+      }
+    }
+    if (maskExpression === 'CPF_CNPJ') {
+      this.cpfCnpjError = !!(arr.length !== 11 && arr.length !== 14);
+      if (arr.length > 11) {
+        maskExpression = '00.000.000/0000-00';
+      } else {
+        maskExpression = '000.000.000-00';
+      }
+    }
     if (maskExpression.startsWith('percent')) {
       if (inputValue.match('[a-z]|[A-Z]') || inputValue.match(/[-!$%^&*()_+|~=`{}\[\]:";'<>?,\/]/)) {
         inputValue = this._stripToDecimal(inputValue);
@@ -107,7 +122,7 @@ export class MaskApplierService {
 
       const thousandSeperatorCharEscaped: string = this._charToRegExpExpression(this.thousandSeparator);
       const decimalMarkerEscaped: string = this._charToRegExpExpression(this.decimalMarker);
-      const invalidChars: string = '@#!$%^&*()_+|~=`{}\\[\\]:\\s,";<>?\\/'
+      const invalidChars: string = '@#!$%^&*()_+|~=`{}\\[\\]:\\s,\\.";<>?\\/'
         .replace(thousandSeperatorCharEscaped, '')
         .replace(decimalMarkerEscaped, '');
 
@@ -283,7 +298,12 @@ export class MaskApplierService {
           this.maskAvailablePatterns[maskExpression[cursor]] &&
           this.maskAvailablePatterns[maskExpression[cursor]].optional
         ) {
-          if (!!inputArray[cursor] && maskExpression !== '099.099.099.099') {
+          if (
+            !!inputArray[cursor] &&
+            maskExpression !== '099.099.099.099' &&
+            maskExpression !== '000.000.000-00' &&
+            maskExpression !== '00.000.000/0000-00'
+          ) {
             result += inputArray[cursor];
           }
           cursor++;
